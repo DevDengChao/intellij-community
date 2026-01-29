@@ -109,6 +109,7 @@ class AppearanceComponents internal constructor(
   val customFontOptionsPanel: DataGridFontOptionsPanel,
   val isStripeRowsCheckBox: Cell<JBCheckBox>,
   val booleanMode: Cell<ComboBox<BooleanMode>>,
+  val persistPinnedColumns: Cell<JBCheckBox>,
 )
 
 fun Panel.produceAppearanceSettings(settings: DataGridAppearanceSettings,
@@ -118,6 +119,7 @@ fun Panel.produceAppearanceSettings(settings: DataGridAppearanceSettings,
   var customFontOptionsPanel: DataGridFontOptionsPanel? = null
   var isStripeRowsCheckBox: Cell<JBCheckBox>? = null
   var booleanMode: Cell<ComboBox<BooleanMode>>? = null
+  var persistPinnedColumns: Cell<JBCheckBox>? = null
 
   row {
     useCustomFontCell = checkBox(IdeBundle.message("checkbox.override.default.laf.fonts"))
@@ -160,5 +162,11 @@ fun Panel.produceAppearanceSettings(settings: DataGridAppearanceSettings,
       .onChanged { updateCallback() }
   }
 
-  return AppearanceComponents(useCustomFontCell!!, customFontOptionsPanel!!, isStripeRowsCheckBox!!, booleanMode!!)
+  row(DataGridBundle.message("settings.persist.pinned.columns.to.project")) {
+    persistPinnedColumns = checkBox(DataGridBundle.message("settings.persist.pinned.columns.to.project.description"))
+      .bindSelected(settings::isPersistPinnedColumnsInProject, settings::setPersistPinnedColumnsInProject)
+      .onChanged { updateCallback() }
+  }
+
+  return AppearanceComponents(useCustomFontCell!!, customFontOptionsPanel!!, isStripeRowsCheckBox!!, booleanMode!!, persistPinnedColumns!!)
 }

@@ -36,6 +36,13 @@ public interface DataGridAppearanceSettings {
 
   void setBooleanMode(@NotNull BooleanMode mode);
 
+  /**
+   * Whether pinned column configuration should be stored on the project level.
+   */
+  boolean isPersistPinnedColumnsInProject();
+
+  void setPersistPinnedColumnsInProject(boolean value);
+
   enum BooleanMode {
     TEXT,
     CHECKBOX

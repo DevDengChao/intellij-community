@@ -3,6 +3,9 @@ package com.intellij.database.datagrid;
 import com.intellij.database.settings.DataGridAppearanceSettings;
 import org.jetbrains.annotations.NotNull;
 
+import com.intellij.database.datagrid.GridColumn;
+import com.intellij.database.datagrid.ModelIndex;
+
 public interface DataGridAppearance {
   void setResultViewVisibleRowCount(int v);
 
@@ -31,4 +34,9 @@ public interface DataGridAppearance {
   void expandMultilineRows(boolean v);
 
   default void setHoveredRowBgHighlightingEnabled(boolean v) {}
+
+  /**
+   * Pin or unpin a column. When pinned, the column should stay on the left while scrolling.
+   */
+  default void pinColumn(@NotNull ModelIndex<GridColumn> columnIdx, boolean pinned) {}
 }

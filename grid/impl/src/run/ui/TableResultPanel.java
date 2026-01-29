@@ -1269,6 +1269,7 @@ public class TableResultPanel extends UserDataHolderBase
     }
 
     private final Map<GridColumn, Attributes> myAttributesMap = new HashMap<>();
+    private final Set<GridColumn> myPinnedColumns = new HashSet<>();
     private List<String> myUnambiguousColumnNames = ContainerUtil.emptyList();
 
     public @NlsSafe @NotNull String getName(GridColumn column) {
@@ -1411,6 +1412,7 @@ public class TableResultPanel extends UserDataHolderBase
     public void newColumns(TableResultPanel resultPanel, Collection<GridColumn> columnsToRetain) {
       updateColumnNames(resultPanel);
       myAttributesMap.keySet().retainAll(columnsToRetain);
+      myPinnedColumns.retainAll(columnsToRetain);
       GridHelper helper = GridHelper.get(resultPanel);
       columnsToRetain.stream()
         .filter(column -> !myAttributesMap.containsKey(column))
@@ -1419,6 +1421,18 @@ public class TableResultPanel extends UserDataHolderBase
 
     public void setSortOrder(GridColumn column, int sortOrder) {
       myAttributesMap.get(column).mySortOrder = sortOrder;
+    }
+
+    public boolean isPinned(GridColumn column) {
+      return myPinnedColumns.contains(column);
+    }
+
+    public void setPinned(GridColumn column, boolean pinned) {
+      if (pinned) myPinnedColumns.add(column); else myPinnedColumns.remove(column);
+    }
+
+    public Set<GridColumn> getPinnedColumns() {
+      return Collections.unmodifiableSet(myPinnedColumns);
     }
   }
 
@@ -1863,4 +1877,3 @@ public class TableResultPanel extends UserDataHolderBase
     boolean myExpandMultilineRows;
     ResultView.HoveredRowBgHighlightMode myHoveredRowBgHighlightMode = ResultView.HoveredRowBgHighlightMode.AUTO;
   }
-}

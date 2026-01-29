@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @State(name = "DataGridAppearanceSettingsImpl", storages = @Storage(DataGridAppearanceSettingsImpl.STATE_NAME + ".xml"), category = SettingsCategory.UI)
 public final class DataGridAppearanceSettingsImpl
   implements PersistentStateComponent<DataGridAppearanceSettingsImpl>, ModificationTracker, DataGridAppearanceSettings {
-  private static final int CURRENT_VERSION = 1;
+  private static final int CURRENT_VERSION = 2;
 
   static final String STATE_NAME = "dataViewsSettings";
 
@@ -159,6 +159,16 @@ public final class DataGridAppearanceSettingsImpl
     booleanMode = mode;
   }
 
+  @Override
+  public boolean isPersistPinnedColumnsInProject() {
+    return persistPinnedColumnsInProject;
+  }
+
+  @Override
+  public void setPersistPinnedColumnsInProject(boolean value) {
+    persistPinnedColumnsInProject = value;
+  }
+
   @Attribute("version")
   @Property(alwaysWrite = true)
   private int version = 0;
@@ -175,4 +185,6 @@ public final class DataGridAppearanceSettingsImpl
   public float gridLineSpacing = -1;
   @OptionTag("boolean-mode")
   public BooleanMode booleanMode = BooleanMode.TEXT;
+  @OptionTag("persist-pinned-columns-in-project")
+  public boolean persistPinnedColumnsInProject = false;
 }

@@ -162,6 +162,8 @@
     <action id="Console.TableResult.ChangeColumnLanguage" class="com.intellij.database.run.actions.ChangeColumnLanguageAction"/>
     <group id="Console.TableResult.ColumnHeaderPopup" popup="true">
       <action id="Console.TableResult.Csv.SetFirstRowIsHeader" class="com.intellij.database.run.actions.SetFirstRowIsHeaderAction"/>
+      <action id="Console.TableResult.PinColumn" class="com.intellij.database.run.actions.ColumnPinAction" icon="AllIcons.General.Pin_tab"/>
+      <action id="Console.TableResult.UnpinColumn" class="com.intellij.database.run.actions.ColumnUnpinAction" icon="AllIcons.General.Pin_tab"/>
       <action id="Console.TableResult.CopyColumnName" class="com.intellij.database.run.actions.CopyColumnNameAction"/>
       <action id="Console.TableResult.RenameColumn" class="com.intellij.database.run.actions.RenameColumnAction"/>
       <action id="TableResult.SelectColumn" class="com.intellij.database.actions.SelectColumnAction"
