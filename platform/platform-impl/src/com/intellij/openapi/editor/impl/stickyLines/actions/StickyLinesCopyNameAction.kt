@@ -45,6 +45,7 @@ internal class StickyLinesCopyNameAction : DumbAwareAction() {
     val elementAtOffset = psiFile.findElementAt(offset) ?: return null
 
     // Find the nearest named element (class, method, function, etc.)
+    // strict=false allows returning the element itself if it's already a PsiNamedElement
     val namedElement = PsiTreeUtil.getParentOfType(elementAtOffset, PsiNamedElement::class.java, false)
     return namedElement?.name
   }
