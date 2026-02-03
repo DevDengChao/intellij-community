@@ -41,7 +41,7 @@ internal class StickyLinesCopyNameAction : DumbAwareAction() {
     val editor = e.getData(CommonDataKeys.EDITOR) ?: return null
     val offset = e.getData(StickyLinesDataKeys.STICKY_LINE_OFFSET) ?: return null
 
-    val psiFile = PsiDocumentManager.getInstance(project).getCachedPsiFile(editor.document) ?: return null
+    val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document) ?: return null
     val elementAtOffset = psiFile.findElementAt(offset) ?: return null
 
     // Find the nearest named element (class, method, function, etc.)

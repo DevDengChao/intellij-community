@@ -367,7 +367,7 @@ internal class StickyLineComponent(private val editor: EditorEx) : JComponent() 
     }
 
     private fun showPopupMenu(event: MouseEvent) {
-      // Build a data context with the sticky line offset for copy actions
+      // Build a data context with the sticky line offset for the copy action
       val dataContext = SimpleDataContext.builder()
         .add(CommonDataKeys.PROJECT, editor.project)
         .add(CommonDataKeys.EDITOR, editor)
