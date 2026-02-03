@@ -5,21 +5,12 @@ import com.intellij.idea.ActionsBundle
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.PsiTreeUtil
 import java.awt.datatransfer.StringSelection
-
-/**
- * DataKey for passing the sticky line navigation offset to copy actions.
- */
-internal object StickyLinesDataKeys {
-  @JvmField
-  val STICKY_LINE_OFFSET: DataKey<Int> = DataKey.create("sticky.line.offset")
-}
 
 /**
  * Action to copy the name of the element (class, method, function) at the sticky line.
