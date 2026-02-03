@@ -13,7 +13,7 @@ import java.awt.datatransfer.DataFlavor;
 
 /**
  * Tests for {@link com.intellij.openapi.editor.impl.stickyLines.actions.StickyLinesCopyNameAction}.
- * Verifies that class names and method names can be copied from sticky lines in Java files.
+ * Verifies that element names (classes, methods, inner classes, fields) can be copied from sticky lines in Java files.
  */
 public class StickyLinesCopyNameActionTest extends LightJavaCodeInsightFixtureTestCase {
 
@@ -120,7 +120,12 @@ public class StickyLinesCopyNameActionTest extends LightJavaCodeInsightFixtureTe
 
   private String getClipboardContents() {
     try {
-      return (String) CopyPasteManager.getInstance().getContents().getTransferData(DataFlavor.stringFlavor);
+      var contents = CopyPasteManager.getInstance().getContents();
+      if (contents == null) {
+        fail("Clipboard contents is null");
+        return null;
+      }
+      return (String) contents.getTransferData(DataFlavor.stringFlavor);
     }
     catch (Exception e) {
       fail("Failed to get clipboard contents: " + e.getMessage());
