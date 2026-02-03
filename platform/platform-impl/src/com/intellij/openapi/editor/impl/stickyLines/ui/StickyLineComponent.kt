@@ -3,7 +3,11 @@ package com.intellij.openapi.editor.impl.stickyLines.ui
 
 import com.intellij.internal.statistic.service.fus.collectors.UIEventLogger
 import com.intellij.lang.Language
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPopupMenu
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.DataManager
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
@@ -367,7 +371,7 @@ internal class StickyLineComponent(private val editor: EditorEx) : JComponent() 
     }
 
     private fun showPopupMenu(event: MouseEvent) {
-      // Build a data context with the sticky line offset for the copy action
+      // Build a data context containing the sticky line offset for actions that require it
       val dataContext = SimpleDataContext.builder()
         .add(CommonDataKeys.PROJECT, editor.project)
         .add(CommonDataKeys.EDITOR, editor)
