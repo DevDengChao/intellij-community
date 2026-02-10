@@ -68,4 +68,3 @@ public final class TerminalScrollToEndAction extends DumbAwareAction {
     return null;
   }
 }
-
