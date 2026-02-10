@@ -40,8 +40,9 @@ class TerminalStickyPromptOverlay(
       JBUI.Borders.empty(4, 8)
     )
     
+    // Use the editor's font from the color scheme
     promptLabel.foreground = (editor as? EditorImpl)?.colorsScheme?.defaultForeground ?: JBColor.foreground()
-    promptLabel.font = editor.colorsScheme.getFont(editor.settings)
+    promptLabel.font = editor.colorsScheme.font
     add(promptLabel, BorderLayout.CENTER)
     
     isVisible = false
@@ -71,7 +72,7 @@ class TerminalStickyPromptOverlay(
         if (lineNumber >= 0 && lineNumber < editor.document.lineCount) {
           val lineStart = editor.document.getLineStartOffset(lineNumber)
           val lineEnd = editor.document.getLineEndOffset(lineNumber)
-          promptLabel.text = outputModel.document.getText(lineStart, lineEnd)
+          promptLabel.text = editor.document.charsSequence.subSequence(lineStart, lineEnd).toString()
         }
       }
     }
