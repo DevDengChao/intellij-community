@@ -45,13 +45,17 @@ public final class TerminalScrollToEndAction extends DumbAwareAction {
     JComponent component = terminalWidget.getComponent();
     JScrollBar scrollBar = findScrollBar(component);
     if (scrollBar != null) {
-      scrollBar.setValue(scrollBar.getMaximum());
+      // Set value to maximum minus visible amount to scroll to actual end
+      scrollBar.setValue(scrollBar.getMaximum() - scrollBar.getVisibleAmount());
     }
   }
 
   private static JScrollBar findScrollBar(Component component) {
-    if (component instanceof JScrollBar) {
-      return (JScrollBar)component;
+    if (component instanceof JScrollBar scrollBar) {
+      // Only return vertical scroll bars
+      if (scrollBar.getOrientation() == JScrollBar.VERTICAL) {
+        return scrollBar;
+      }
     }
     if (component instanceof java.awt.Container container) {
       for (Component child : container.getComponents()) {
