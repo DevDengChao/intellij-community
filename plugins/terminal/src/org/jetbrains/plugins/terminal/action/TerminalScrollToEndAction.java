@@ -50,6 +50,13 @@ public final class TerminalScrollToEndAction extends DumbAwareAction {
     }
   }
 
+  /**
+   * Recursively searches the component tree for a vertical scroll bar.
+   * Returns the first vertical JScrollBar found in depth-first order.
+   *
+   * @param component the root component to search from
+   * @return the first vertical JScrollBar found, or null if none exists
+   */
   private static JScrollBar findScrollBar(Component component) {
     if (component instanceof JScrollBar scrollBar) {
       // Only return vertical scroll bars

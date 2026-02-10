@@ -151,7 +151,7 @@ public final class TerminalContainer {
 
       revalidate();
     }
-    
+
     private @NotNull DefaultActionGroup createToolbarActions() {
       DefaultActionGroup group = new DefaultActionGroup();
       group.add(new TerminalScrollToEndAction());
