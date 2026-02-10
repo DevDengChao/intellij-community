@@ -85,15 +85,7 @@ class TerminalOutputScrollingModelImpl(
           shouldScrollToCursor = true
         }
         else if (e.oldRectangle != null && e.oldRectangle.y != e.newRectangle.y) {
-          // The user has changed the scroll offset
-          val scrolledUp = e.newRectangle.y < e.oldRectangle.y
-          
-          if (scrolledUp) {
-            // User is scrolling up - ensure input line stays visible at bottom
-            ensureInputLineVisible()
-          }
-          
-          // Stop following the cursor automatically
+          // The user has changed the scroll offset, so we should stop following the cursor.
           shouldScrollToCursor = false
         }
       }
@@ -107,41 +99,6 @@ class TerminalOutputScrollingModelImpl(
     }
     if (shouldScrollToCursor) {
       updateScrollPosition(outputModel.cursorOffset)
-    }
-  }
-
-  /**
-   * Ensures that the input line (where the cursor is located) remains visible at the bottom
-   * when the user scrolls up manually. This provides a "sticky bottom" effect similar to
-   * Excel's freeze panes feature by limiting how far up the user can scroll.
-   */
-  @RequiresEdt
-  private fun ensureInputLineVisible() {
-    val currentScrollY = editor.scrollingModel.verticalScrollOffset
-    val visibleArea = editor.scrollingModel.visibleArea
-    
-    val cursorOffset = outputModel.cursorOffset.toRelative(outputModel)
-    val cursorVisualLine = editor.offsetToVisualLine(cursorOffset, true)
-    val cursorLineY = editor.visualLineToY(cursorVisualLine)
-    val cursorLineBottomY = cursorLineY + editor.lineHeight
-    
-    val bottomInset = JBUI.scale(TerminalUi.blockBottomInset)
-    
-    // Calculate the minimum scroll position that still keeps the input line visible at the bottom
-    // At this scroll position, the input line's bottom edge (with inset) will be exactly at the viewport's bottom edge
-    val maxAllowedScrollY = cursorLineBottomY + bottomInset - visibleArea.height
-    
-    // Only adjust scroll if:
-    // 1. The max allowed scroll is positive (content is taller than viewport)
-    // 2. Current scroll is less than the maximum allowed (user has scrolled beyond the limit where input line remains visible)
-    if (maxAllowedScrollY > 0 && currentScrollY < maxAllowedScrollY) {
-      // If currentScrollY < maxAllowedScrollY, the user has scrolled beyond the limit where
-      // the input line would remain visible, so we adjust the scroll position back to maxAllowedScrollY.
-      editor.doTerminalOutputScrollChangingAction {
-        editor.doWithoutScrollingAnimation {
-          editor.scrollingModel.scrollVertically(maxAllowedScrollY)
-        }
-      }
     }
   }
 
