@@ -2,8 +2,11 @@
 package org.jetbrains.plugins.terminal.ui;
 
 import com.intellij.ide.IdeCoreBundle;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DataKey;
 import com.intellij.openapi.actionSystem.DataSink;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -20,6 +23,7 @@ import org.jetbrains.plugins.terminal.ShellTerminalWidget;
 import org.jetbrains.plugins.terminal.TerminalBundle;
 import org.jetbrains.plugins.terminal.TerminalOptionsProvider;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
+import org.jetbrains.plugins.terminal.action.TerminalScrollToEndAction;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -138,7 +142,20 @@ public final class TerminalContainer {
       }
       removeAll();
       add(childComponent, BorderLayout.CENTER);
+      
+      // Add right sidebar toolbar similar to Build window
+      DefaultActionGroup toolbarActions = createToolbarActions();
+      ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("TerminalToolbar", toolbarActions, false);
+      toolbar.setTargetComponent(childComponent);
+      add(toolbar.getComponent(), BorderLayout.EAST);
+      
       revalidate();
+    }
+    
+    private @NotNull DefaultActionGroup createToolbarActions() {
+      DefaultActionGroup group = new DefaultActionGroup();
+      group.add(new TerminalScrollToEndAction());
+      return group;
     }
   }
 }
