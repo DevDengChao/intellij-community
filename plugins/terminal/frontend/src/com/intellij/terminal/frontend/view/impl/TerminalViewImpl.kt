@@ -351,6 +351,14 @@ class TerminalViewImpl(
         startupOptions.envVariables,
         coroutineScope.childScope("TerminalCommandCompletion")
       )
+      
+      // Install sticky prompt overlay for the new terminal architecture
+      configureStickyPromptOverlay(
+        outputEditor,
+        outputModel,
+        shellIntegration,
+        coroutineScope.childScope("TerminalStickyPromptOverlay")
+      )
     }
   }
 
@@ -601,9 +609,41 @@ class TerminalViewImpl(
     )
     editor.putUserData(TerminalCommandCompletionServices.KEY, services)
   }
+  
+  private fun configureStickyPromptOverlay(
+    editor: EditorEx,
+    outputModel: TerminalOutputModel,
+    shellIntegration: TerminalShellIntegration,
+    coroutineScope: CoroutineScope,
+  ) {
+    val overlay = TerminalStickyPromptOverlay(editor, outputModel, shellIntegration)
+    terminalPanel.layeredPane.installStickyOverlay(overlay)
+    
+    // Update overlay content when document changes
+    outputModel.addListener(coroutineScope.asDisposable(), object : TerminalOutputModelListener {
+      override fun afterContentChanged(event: TerminalContentChangeEvent) {
+        overlay.updateContent()
+      }
+      
+      override fun cursorOffsetChanged(event: TerminalCursorOffsetChangeEvent) {
+        overlay.updateContent()
+      }
+    })
+    
+    // Update overlay visibility based on scroll position
+    editor.scrollingModel.addVisibleAreaListener(object : com.intellij.openapi.editor.event.VisibleAreaListener {
+      override fun visibleAreaChanged(e: com.intellij.openapi.editor.event.VisibleAreaEvent) {
+        overlay.updateVisibility()
+      }
+    }, coroutineScope.asDisposable())
+    
+    // Initial update
+    overlay.updateContent()
+    overlay.updateVisibility()
+  }
 
   private inner class TerminalPanel(initialContent: Editor) : BorderLayoutPanel(), UiDataProvider, TerminalPanelMarker {
-    private val layeredPane = TerminalLayeredPane(initialContent)
+    val layeredPane = TerminalLayeredPane(initialContent)
     private var curEditor: Editor = initialContent
 
     val preferredFocusableComponent: JComponent
@@ -686,6 +726,7 @@ class TerminalViewImpl(
 
   private class TerminalLayeredPane(initialContent: Editor) : JBLayeredPane() {
     private var curEditor: Editor = initialContent
+    private var stickyOverlay: TerminalStickyPromptOverlay? = null
 
     val preferredFocusableComponent: JComponent
       get() = curEditor.contentComponent
@@ -718,6 +759,22 @@ class TerminalViewImpl(
       revalidate()
       repaint()
     }
+    
+    fun installStickyOverlay(overlay: TerminalStickyPromptOverlay) {
+      stickyOverlay = overlay
+      addToLayer(overlay, POPUP_LAYER)
+      revalidate()
+      repaint()
+    }
+    
+    fun removeStickyOverlay() {
+      stickyOverlay?.let {
+        remove(it)
+        stickyOverlay = null
+        revalidate()
+        repaint()
+      }
+    }
 
     override fun getPreferredSize(): Dimension {
       return if (curEditor.document.textLength == 0) Dimension() else (curEditor as EditorImpl).preferredSize
@@ -725,8 +782,9 @@ class TerminalViewImpl(
 
     override fun doLayout() {
       for (component in components) {
-        when (component) {
-          curEditor.component -> layoutEditor(component)
+        when {
+          component === curEditor.component -> layoutEditor(component)
+          component === stickyOverlay -> layoutStickyOverlay(component)
           else -> layoutSearchComponent(component)
         }
       }
@@ -742,6 +800,11 @@ class TerminalViewImpl(
       val compWidth = minOf(width, prefSize.width, maxSize.width)
       val compHeight = min(prefSize.height, maxSize.height)
       component.setBounds(width - compWidth, 0, compWidth, compHeight)
+    }
+    
+    private fun layoutStickyOverlay(component: Component) {
+      val prefHeight = component.preferredSize.height
+      component.setBounds(0, height - prefHeight, width, prefHeight)
     }
   }
 }
