@@ -142,13 +142,13 @@ public final class TerminalContainer {
       }
       removeAll();
       add(childComponent, BorderLayout.CENTER);
-      
+
       // Add right sidebar toolbar similar to Build window
       DefaultActionGroup toolbarActions = createToolbarActions();
       ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("TerminalToolbar", toolbarActions, false);
       toolbar.setTargetComponent(childComponent);
       add(toolbar.getComponent(), BorderLayout.EAST);
-      
+
       revalidate();
     }
     
