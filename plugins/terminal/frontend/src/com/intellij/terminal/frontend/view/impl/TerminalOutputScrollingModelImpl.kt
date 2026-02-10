@@ -87,6 +87,9 @@ class TerminalOutputScrollingModelImpl(
         else if (e.oldRectangle != null && e.oldRectangle.y != e.newRectangle.y) {
           // The user has changed the scroll offset, so we should stop following the cursor.
           shouldScrollToCursor = false
+          
+          // When user scrolls up, ensure the input line (where cursor is) remains visible at the bottom
+          ensureInputLineVisible()
         }
       }
     }, coroutineScope.asDisposable())
@@ -99,6 +102,36 @@ class TerminalOutputScrollingModelImpl(
     }
     if (shouldScrollToCursor) {
       updateScrollPosition(outputModel.cursorOffset)
+    }
+  }
+
+  /**
+   * Ensures that the input line (where the cursor is located) remains visible at the bottom
+   * when the user scrolls up manually. This provides a "sticky bottom" effect similar to
+   * Excel's freeze panes feature.
+   */
+  @RequiresEdt
+  private fun ensureInputLineVisible() {
+    val cursorOffset = outputModel.cursorOffset.toRelative(outputModel)
+    val cursorVisualLine = editor.offsetToVisualLine(cursorOffset, true)
+    val cursorLineY = editor.visualLineToY(cursorVisualLine)
+    val cursorLineBottomY = cursorLineY + editor.lineHeight
+    
+    val visibleArea = editor.scrollingModel.visibleArea
+    val viewportBottom = visibleArea.y + visibleArea.height
+    val bottomInset = JBUI.scale(TerminalUi.blockBottomInset)
+    
+    // If the cursor line is not visible or partially visible at the bottom, adjust scroll
+    if (cursorLineBottomY + bottomInset > viewportBottom) {
+      // Calculate how much we need to scroll down to make the input line fully visible
+      val neededScroll = cursorLineBottomY + bottomInset - viewportBottom
+      val newScrollY = editor.scrollingModel.verticalScrollOffset + neededScroll
+      
+      editor.doTerminalOutputScrollChangingAction {
+        editor.doWithoutScrollingAnimation {
+          editor.scrollingModel.scrollVertically(newScrollY)
+        }
+      }
     }
   }
 
