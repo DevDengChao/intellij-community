@@ -85,11 +85,16 @@ class TerminalOutputScrollingModelImpl(
           shouldScrollToCursor = true
         }
         else if (e.oldRectangle != null && e.oldRectangle.y != e.newRectangle.y) {
-          // The user has changed the scroll offset, so we should stop following the cursor.
-          shouldScrollToCursor = false
+          // The user has changed the scroll offset
+          val scrolledUp = e.newRectangle.y < e.oldRectangle.y
           
-          // When user scrolls up, ensure the input line (where cursor is) remains visible at the bottom
-          ensureInputLineVisible()
+          if (scrolledUp) {
+            // User is scrolling up - ensure input line stays visible at bottom
+            ensureInputLineVisible()
+          }
+          
+          // Stop following the cursor automatically
+          shouldScrollToCursor = false
         }
       }
     }, coroutineScope.asDisposable())
@@ -108,7 +113,7 @@ class TerminalOutputScrollingModelImpl(
   /**
    * Ensures that the input line (where the cursor is located) remains visible at the bottom
    * when the user scrolls up manually. This provides a "sticky bottom" effect similar to
-   * Excel's freeze panes feature.
+   * Excel's freeze panes feature by limiting how far up the user can scroll.
    */
   @RequiresEdt
   private fun ensureInputLineVisible() {
@@ -121,15 +126,16 @@ class TerminalOutputScrollingModelImpl(
     val viewportBottom = visibleArea.y + visibleArea.height
     val bottomInset = JBUI.scale(TerminalUi.blockBottomInset)
     
-    // If the cursor line is not visible or partially visible at the bottom, adjust scroll
-    if (cursorLineBottomY + bottomInset > viewportBottom) {
-      // Calculate how much we need to scroll down to make the input line fully visible
-      val neededScroll = cursorLineBottomY + bottomInset - viewportBottom
-      val newScrollY = editor.scrollingModel.verticalScrollOffset + neededScroll
-      
+    // Calculate the maximum scroll position that still keeps the input line visible
+    val maxAllowedScrollY = cursorLineBottomY + bottomInset - visibleArea.height
+    
+    // If current scroll exceeds the maximum (input line would be hidden), limit it
+    val currentScrollY = editor.scrollingModel.verticalScrollOffset
+    if (currentScrollY < maxAllowedScrollY) {
+      // We've scrolled too far up, adjust back to keep input line visible
       editor.doTerminalOutputScrollChangingAction {
         editor.doWithoutScrollingAnimation {
-          editor.scrollingModel.scrollVertically(newScrollY)
+          editor.scrollingModel.scrollVertically(maxAllowedScrollY.coerceAtLeast(0))
         }
       }
     }
