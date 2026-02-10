@@ -117,14 +117,15 @@ class TerminalOutputScrollingModelImpl(
    */
   @RequiresEdt
   private fun ensureInputLineVisible() {
+    val currentScrollY = editor.scrollingModel.verticalScrollOffset
+    val visibleArea = editor.scrollingModel.visibleArea
+    
     val cursorOffset = outputModel.cursorOffset.toRelative(outputModel)
     val cursorVisualLine = editor.offsetToVisualLine(cursorOffset, true)
     val cursorLineY = editor.visualLineToY(cursorVisualLine)
     val cursorLineBottomY = cursorLineY + editor.lineHeight
     
-    val visibleArea = editor.scrollingModel.visibleArea
     val bottomInset = JBUI.scale(TerminalUi.blockBottomInset)
-    val currentScrollY = editor.scrollingModel.verticalScrollOffset
     
     // Calculate the minimum scroll position that still keeps the input line visible at the bottom
     // At this scroll position, the input line's bottom edge (with inset) will be exactly at the viewport's bottom edge
@@ -132,11 +133,10 @@ class TerminalOutputScrollingModelImpl(
     
     // Only adjust scroll if:
     // 1. The max allowed scroll is positive (content is taller than viewport)
-    // 2. Current scroll is less than the maximum allowed (scrolled too far up)
+    // 2. Current scroll is less than the maximum allowed (user has scrolled beyond the limit where input line remains visible)
     if (maxAllowedScrollY > 0 && currentScrollY < maxAllowedScrollY) {
-      // We've scrolled too far up, adjust back to keep input line visible
-      // Lower scrollY values mean scrolled further up, so currentScrollY < maxAllowedScrollY means
-      // the input line has been scrolled out of view below the viewport
+      // If currentScrollY < maxAllowedScrollY, the user has scrolled beyond the limit where
+      // the input line would remain visible, so we adjust the scroll position back to maxAllowedScrollY.
       editor.doTerminalOutputScrollChangingAction {
         editor.doWithoutScrollingAnimation {
           editor.scrollingModel.scrollVertically(maxAllowedScrollY)
