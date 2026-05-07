@@ -1784,6 +1784,8 @@
     </group>
 
     <group id="EditorStickyLinesSettings" popup="true" searchable="false">
+      <action id="EditorStickyLinesCopyName" class="com.intellij.openapi.editor.impl.stickyLines.actions.StickyLinesCopyNameAction"/>
+      <separator/>
       <action id="EditorStickyConfigure" class="com.intellij.openapi.editor.impl.stickyLines.actions.StickyLinesConfigureAction"/>
       <action id="EditorStickyLinesDisableForLang"
               class="com.intellij.openapi.editor.impl.stickyLines.actions.StickyLinesDisableForLangAction"/>

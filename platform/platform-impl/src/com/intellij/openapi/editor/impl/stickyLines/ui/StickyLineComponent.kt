@@ -4,7 +4,11 @@ package com.intellij.openapi.editor.impl.stickyLines.ui
 import com.intellij.internal.statistic.service.fus.collectors.UIEventLogger
 import com.intellij.lang.Language
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPopupMenu
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.DataManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.ScrollType
@@ -13,6 +17,7 @@ import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.ex.util.EditorUIUtil
 import com.intellij.openapi.editor.impl.EditorImpl
+import com.intellij.openapi.editor.impl.stickyLines.actions.StickyLinesDataKeys
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.util.Key
 import com.intellij.util.ui.MouseEventAdapter
@@ -27,7 +32,6 @@ import java.awt.event.MouseWheelEvent
 import java.awt.event.MouseWheelListener
 import java.awt.image.BufferedImage
 import javax.swing.JComponent
-import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
 
 
@@ -224,14 +228,14 @@ internal class StickyLineComponent(private val editor: EditorEx) : JComponent() 
   )
 
   private inner class StickyMouseListener : MouseListener, MouseMotionListener, MouseWheelListener {
-    private val popMenu: JPopupMenu
+    private val actionPopupMenu: ActionPopupMenu
     var isPopup = false
     var isGutterHovered = false
 
     init {
       val actionManager = ActionManager.getInstance()
       val actionGroup = actionManager.getAction("EditorStickyLinesSettings") as DefaultActionGroup
-      popMenu = actionManager.createActionPopupMenu("StickyLine", actionGroup).component
+      actionPopupMenu = actionManager.createActionPopupMenu("StickyLine", actionGroup)
     }
 
     override fun mousePressed(e: MouseEvent?) = handleEvent(e)
@@ -334,7 +338,7 @@ internal class StickyLineComponent(private val editor: EditorEx) : JComponent() 
         MouseEvent.MOUSE_PRESSED -> {
           isPopup = event.isPopupTrigger
           if (isPopup) {
-            popMenu.show(event.component, event.x, event.y)
+            showPopupMenu(event)
           }
         }
         MouseEvent.MOUSE_RELEASED -> {
@@ -342,7 +346,7 @@ internal class StickyLineComponent(private val editor: EditorEx) : JComponent() 
           if (!isPopup) {
             isPopup = event.isPopupTrigger
             if (isPopup) {
-              popMenu.show(event.component, event.x, event.y)
+              showPopupMenu(event)
             }
           }
         }
@@ -368,6 +372,18 @@ internal class StickyLineComponent(private val editor: EditorEx) : JComponent() 
         }
         else -> throwUnhandledEvent(event)
       }
+    }
+
+    private fun showPopupMenu(event: MouseEvent) {
+      // Build a data context containing the sticky line offset for actions that require it
+      val dataContext = SimpleDataContext.builder()
+        .add(CommonDataKeys.PROJECT, editor.project)
+        .add(CommonDataKeys.EDITOR, editor)
+        .add(StickyLinesDataKeys.STICKY_LINE_OFFSET, offsetOnClick)
+        .setParent(DataManager.getInstance().getDataContext(event.component))
+        .build()
+      actionPopupMenu.setDataContext { dataContext }
+      actionPopupMenu.component.show(event.component, event.x, event.y)
     }
 
     private fun isGutterEvent(event: MouseEvent): Boolean {
